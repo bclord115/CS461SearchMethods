@@ -33,6 +33,7 @@ class Location():
         self.name = name
         self.x = x
         self.y = y
+        self.adj = []
 
 locations = []
 ldict = {}
@@ -42,9 +43,20 @@ with open("coordinates.csv", newline='') as f:
     for r in reader:
         l = Location(name=r[0], x=r[1].lstrip(), y=r[2].lstrip())
         locations.append(l)
-        ldict[l.name] = (l.x, l.y)
+        ldict[l.name] = l
 
-
+with open("Adjacencies.txt", "r") as fa:
+    #print("Opening Adjacencies")
+    lines = fa.readlines()
+    for l in lines:
+        aj = l.split(" ")
+        a = ldict.get(aj[0].rstrip("\\n"))
+        #print(f"Got location {a.name}") 
+        if a:
+            if a.adj is None:
+                a.adj = []
+            a.adj.append(aj[1].rstrip(f"\n"))
+        #fa.
 print(locations)
 print(ldict)
 
@@ -52,5 +64,16 @@ method = input(f"Select Method:\n\t0: Undirected(blind) Brute-Force\n\t1: Breadt
 if method in [range(0,5)]:
     print(method) 
 
-start = input("Input Starting Town")
-end = input("Input Ending Town")
+start = input("Input Starting Town: ")
+if ldict.get(start):
+    print(f"Valid Start Town: {start}")
+else:
+    print(f"Invalid Starting Town {start}")
+end = input("Input Ending Town: ")
+if ldict.get(end):
+    print(f"Valid Ending Town: {end}")
+else:
+    print(f"Invalid Ending Town {end}")
+
+for i in ldict.keys():
+    print(i, ldict.get(i).adj)
