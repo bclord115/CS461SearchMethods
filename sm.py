@@ -1,7 +1,7 @@
 import csv
 import math
 from time import perf_counter
-import geopy
+from collections import defaultdict
 class Location():
     def __init__(self, name, x, y):
         self.name = name
@@ -60,10 +60,25 @@ def BruteForce(start, end, path=[]):
                 paths.append(n)
 
     return paths
-
-def BreadthFirst():
+    
+def BreadthFirst(start, end):
     print("Breadth-First Method")
-
+    q = []
+    start.visited = True
+    q.append([start])
+    print(q)
+    while q:
+        path = q.pop(0)
+        print(path, type(path))
+        n = path[-1]
+        if n == end:
+            return path
+        for i in n.adj:
+            if i.visited == False:
+                i.visited = True
+                q.append(i)
+                print(q)
+    print(r)
 def DepthFirst():
     print('Depth-First Method')
 
@@ -139,7 +154,7 @@ if method in range(0,5):
         finaltime = bfte - bft
         print(f"Using the Brute-Force Method:\nFound {len(bf)} routes, the Shortest Route was {finalstr} with a length of {shortdistance} miles in {finaltime} seconds.")
     elif method == 1:
-        BreadthFirst()
+        BreadthFirst(ldict.get(start), ldict.get(end))
     elif method == 2:
         DepthFirst()
     elif method == 3:
