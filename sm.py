@@ -1,7 +1,7 @@
 import csv
 import math
 from time import perf_counter
-from collections import defaultdict
+from collections import deque
 class Location():
     def __init__(self, name, x, y):
         self.name = name
@@ -11,10 +11,10 @@ class Location():
         self.valid = False
         self.visited = False
 
-def RouteString(route):
+def RouteString(routes):
     o = "["
-    for p in route:
-        o = o + p.name + ", "
+    for route in routes:
+        o = o + route.name + ", "
     o = o[:-2] + "]"
     return o
 
@@ -60,28 +60,121 @@ def BruteForce(start, end, path=[]):
                 paths.append(n)
 
     return paths
-    
-def BreadthFirst(start, end):
-    print("Breadth-First Method")
-    q = []
-    start.visited = True
-    q.append([start])
-    print(q)
-    while q:
-        path = q.pop(0)
-        print(path, type(path))
-        n = path[-1]
-        if n == end:
-            return path
-        for i in n.adj:
-            if i.visited == False:
-                i.visited = True
-                q.append(i)
-                print(q)
-    print(r)
-def DepthFirst():
-    print('Depth-First Method')
 
+def BFSBT(parent, start, end):
+    path = [end]
+    while(path[-1] != start):
+        #print("Path:", path[-1])
+        path.append(parent[path[-1]])
+    path.reverse()
+    return path
+
+"""
+Need to implement distance 
+and 
+figure out why path is so much longer and if thats ok
+"""
+
+def BreadthFirst(start, end):
+    """
+    Implementation modified from https://stackoverflow.com/a/8922151
+    """
+    print("Breadth-First Method")
+    for x in ldict.items():
+        x[1].visited = False
+    parent = {}
+    start.visited = True
+    q = deque([start])
+    while q:
+        node = q.pop()
+        #print(node)
+        if node == end:
+            return BFSBT(parent, start, end)
+        for a in ldict.get(node.name).adj:
+            if a.visited == False and a not in q:
+                a.visited = True
+                parent[a] = node
+                q.append(a)
+
+def DFSUtil(start, end, path=None):
+    print(f"At {start.name}")
+    start.visited = True
+    if path is None:
+        path = []
+    path.append(start)
+    il = True
+    for a in start.adj:
+        if not a.visited:
+            print(f"Visit {a.name}")
+            if a == end:
+                print(f"Found Match {a.name}")
+                path.append(a)
+                il = False
+                break 
+            else:
+                print(f"Recurse {a.name}")
+                a.visited = True
+                return DFSUtil(a, end, path)
+        elif not il:
+            break
+        elif a.visited:
+            continue
+            #print(f"Backtracking {a.name}")
+            #return DFSUtil(a, end, path)
+
+    if not il:
+        return path
+    
+def DFS(start, end):
+    p = DFSUtil(start, end)
+    print(p)
+    return p
+"""       
+def DFS(start, end, dpath=None, e=None):
+    if dpath is None:
+        df = []
+    else:
+        df = dpath
+    start.visited = True
+    df.append(start)
+    print(f"Visit @{start.name}")
+    if start == end:
+        print(f"Match found {start.name}\nReturning df: {df}")
+        return df
+    for a in start.adj:
+        if not a.visited and a not in df:
+            a.visited = True
+            print(f"Recurse {a.name}")
+            return DFS(a, end, df)
+        elif a in df:
+            for aa in a.adj:
+                if not aa.visited:
+                    print(f"other Recurse {aa.name}")
+                    #df.pop()
+                    aa.visited = True
+                    return DFS(aa, end, df)
+                else:
+                    print(f"Back Recurse {aa.name}")
+                    continue
+                    #return DFS(f)
+        elif a not in df:
+            print(f"I Guess another back recurse {a.name}")
+            f = df.pop()
+            return DFS(f, end, df)
+        else:
+            continue
+        #else:# a.visited and a in df:
+
+"""
+#return df
+"""
+    elif a not in df:
+        print(f"Continuing {a.name}")
+        f = df.pop(0)
+        return DFS(f, end, df)
+    else:
+        continue
+"""
 def IDDFS():
     print("ID-DFS Method")
 
@@ -121,21 +214,26 @@ s = True
 while s:
     start = input("Input Starting Town: ")
     if ldict.get(start):
-        print(f"Valid Start Town: {start}")
+        #print(f"Valid Start Town: {start}")
         s = False
     else:
         print(f"Invalid Starting Town {start}")
-end = input("Input Ending Town: ")
 e = True
 while e:
+    end = input("Input Ending Town: ")
     if ldict.get(end):
-        print(f"Valid Ending Town: {end}")
+        #print(f"Valid Ending Town: {end}")
         e = False
     else:
         print(f"Invalid Ending Town {end}")
-
-method = int(input(f"\t0: Undirected(blind) Brute-Force\n\t1: Breadth-First\n\t2:Depth-First\n\t3: ID-DFS\n\t4: Best-First\n\t5: A*\nSelect Method: "))
-if method in range(0,5):
+method = 0
+while method in range(0,7):
+    method = input(f"0: Undirected(blind) Brute-Force\n1: Breadth-First\n2: Depth-First\n3: ID-DFS\n4: Best-First\n5: A*\n6: Change Cities\nSelect Method: ")
+    try:
+        method = int(method)
+    except:
+        print(f"Out of Range, Exiting")
+        method = 9
     if method == 0:
         bft = perf_counter()
         bf = BruteForce(start=ldict.get(start), end=ldict.get(end))
@@ -152,17 +250,39 @@ if method in range(0,5):
                 shortdistance = d
         bfte = perf_counter()
         finaltime = bfte - bft
-        print(f"Using the Brute-Force Method:\nFound {len(bf)} routes, the Shortest Route was {finalstr} with a length of {shortdistance} miles in {finaltime} seconds.")
+        print(f"Using the Brute-Force Method:\nFound {len(bf)} routes, the Shortest Route was {finalstr} with a length of {shortdistance} miles in {finaltime} seconds.\n")
     elif method == 1:
-        BreadthFirst(ldict.get(start), ldict.get(end))
+        bfst = perf_counter()
+        bfs = BreadthFirst(ldict.get(start), ldict.get(end))
+        d = RouteDistance(bfs)
+        bfse = perf_counter()
+        finaltime = bfse - bfst
+        o = RouteString(bfs)
+        print(f"Found route {o} with a distance of {d} miles in {finaltime} seconds.\n")
     elif method == 2:
-        DepthFirst()
+        print('Depth-First Method')
+        dfst = perf_counter()
+        for x in ldict.items():
+            x[1].visited = False
+        df = DFS(ldict.get(start), ldict.get(end))
+        dfse = perf_counter()
+        finaltime = dfse - dfst
+        if df is not None:
+            o = RouteString(df)
+            d = RouteDistance(df)
+        else:
+            o = "Error"
+            d = 0
+        print(f"Found Route {o} with a distance of {d} miles in {finaltime} seconds\n")
     elif method == 3:
         IDDFS()
     elif method == 4:
         BestFirst()
     elif method == 5:
         AStar()
-else:
-    print("Incorrect Method Number")
+    elif method == 6:
+        start = input("Input Start City: ")
+        end = input("Input End City: ")
+    else:
+        exit
 
