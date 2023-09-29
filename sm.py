@@ -2,6 +2,8 @@ import csv
 import math
 from time import perf_counter
 from collections import deque
+from queue import PriorityQueue
+
 class Location():
     def __init__(self, name, x, y):
         self.name = name
@@ -175,8 +177,26 @@ def DFS(start, end, dpath=None, e=None):
     else:
         continue
 """
-def IDDFS():
+def DLS(start, end, maxD, path):
+    if start == end:
+        return path
+    if maxD <= 0:
+        return False
+    for i in start.adj:
+        if DLS(i, end, maxD-1, path):
+            path.append(i)
+            return path
+    return False
+
+def IDDFS(start, end, maxD=3):
     print("ID-DFS Method")
+    paths = []
+    for i in range(maxD):
+        path = []
+        d = DLS(start, end, i, path)
+        if d:
+            print(d)
+            return d
 
 def BestFirst():
     print("Best-First Method")
@@ -275,7 +295,8 @@ while method in range(0,7):
             d = 0
         print(f"Found Route {o} with a distance of {d} miles in {finaltime} seconds\n")
     elif method == 3:
-        IDDFS()
+        idf = IDDFS(ldict.get(start), ldict.get(end))
+        print(idf)
     elif method == 4:
         BestFirst()
     elif method == 5:
