@@ -198,8 +198,32 @@ def IDDFS(start, end, maxD=3):
             print(d)
             return d
 
-def BestFirst():
+def BFFS(start, end):
+    ola = math.radians(float(start.x))
+    olo = math.radians(float(start.y))
+    ela = math.radians(float(end.x))
+    elo = math.radians(float(end.y))
+    lad = ela - ola
+    lod = elo - olo
+    r = 6378127
+    a = math.sin(lad / 2) ** 2 + math.cos(ola) * math.cos(ela) * math.sin(lod / 2) ** 2
+    c = 2 * math.asin(math.sqrt(a))
+    dp = c * r
+    distance = distance + dp
+    return int((distance * 0.000621371) * 10**2) / 10**2
+def BestFirst(start, end, path=None):
     print("Best-First Method")
+    qp = [(0, start)]
+    while qp:
+        p, c = qp.pop()
+        if c == end:
+            path.append(c)
+            return path
+        c.adj.sort(key=lambda cc: BFFS(c, end))
+        for n, d in c.adj:
+            if n.visited is False:
+                qp.append((d,n))
+    return False
 
 def AStar():
     print("A* Method")
@@ -295,12 +319,26 @@ while method in range(0,7):
             d = 0
         print(f"Found Route {o} with a distance of {d} miles in {finaltime} seconds\n")
     elif method == 3:
+        ist = perf_counter()
         idf = IDDFS(ldict.get(start), ldict.get(end))
-        print(idf)
+        d = RouteDistance(idf)
+        o = RouteString(idf)
+        ise = perf_counter()
+        iff = ise - idf
+        print(f"Found path {o} with a distance of {d} miles in {iff} seconds")
     elif method == 4:
-        BestFirst()
+        bfss = perf_counter()
+        for x in ldict.items():
+            x[1].visited = False
+        bff = BestFirst(ldict.get(start), ldict.get(end))
+
+        bfse = perf_counter()
+        bfft = bfse - bfss
+        d = RouteDistance(bff)
+        o = RouteString(bff)
+        print(f"Found path {o} with a distance of {d} miles in {bfft} seconds.")
     elif method == 5:
-        AStar()
+        AStar(ldict.get(start), ldict.get(end))
     elif method == 6:
         start = input("Input Start City: ")
         end = input("Input End City: ")
