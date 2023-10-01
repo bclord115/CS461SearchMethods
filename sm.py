@@ -212,6 +212,11 @@ def BFFS(start, end):
     distance = distance + dp
     return int((distance * 0.000621371) * 10**2) / 10**2
 def BestFirst(start, end, path=None):
+    """
+    Modified from ChatGPT 3.5
+    Prompt:
+    using python you are given a list of towns and then another list of adjacent city pairs. I need to perform a best-first search between 2 towns
+    """
     print("Best-First Method")
     qp = [(0, start)]
     while qp:
